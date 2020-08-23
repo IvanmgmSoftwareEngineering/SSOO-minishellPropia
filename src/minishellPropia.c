@@ -40,9 +40,11 @@ int main(void) {
 		printf("msh> ");
 
 		apuntador_entradaUsuario = fgets (entradaUsuario,100,stdin);
+		strtok(entradaUsuario, "\n"); //Elminia el salto de linea de la cadena entradaUsusario
+		//Quitamos
 		//fgets (entradaUsuario, 100, stdin);
 
-
+		printf("\n");//Dejar aqui porque sino la consola se vuelve loca
 
 
 		//strcmp(apuntador_entrada_usuario,"\n")==0
@@ -66,21 +68,21 @@ int main(void) {
 				printf("\n");
 				printf("--El comando introducido por el usuario es: : %s\n",entradaUsuario);
 
-				apuntador_objeto_tline =  tokenize(entradaUsuario);
+				apuntador_objeto_tline =  tokenize(apuntador_entradaUsuario);
 				printf("-- Analizamos el mandato\n");
 
-				printf("---- Número comandos recibidos en la linea es: %d \n", apuntador_objeto_tline->ncommands);
-				int i =1;
 				int numComandosRecibidos;
 				numComandosRecibidos = apuntador_objeto_tline->ncommands;
 
+				printf("---- Número comandos recibidos en la linea es: %d \n", apuntador_objeto_tline->ncommands);
+				int i =1;
 
 				while(i<=numComandosRecibidos){
 
-					printf("---- El mandato %i que contiene la linea es: %s\n",i,apuntador_objeto_tline->commands->filename);
+					printf("---- El mandato %i que contiene la linea es: %s\n",i,apuntador_objeto_tline->commands[i-1].filename);
 					i++;
 				}
-				printf("F\n");
+
 
 
 			}

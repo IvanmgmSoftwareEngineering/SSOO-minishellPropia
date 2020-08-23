@@ -8,6 +8,6 @@
 #ifndef MY_LIBRERIA_H_
 #define MY_LIBRERIA_H_
 
-const char *my_strchr2(const char *fuente1, int caracterBuscado);
+char *my_strchr2(const char *fuente1, int caracterBuscado);
 
 #endif /* MY_LIBRERIA_H_ */
