@@ -11,89 +11,81 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "libreria.h"
+#include <signal.h>
 
-struct tcommand objeto_tcommand;
-struct tline objeto_tline;
+#include "error_mandatos.h"
+#include "libreria.h"
+#include "my_libreria.h"
+
+void catch1(int sig);
+
+int foo = 1;
+int signal2 = 0;
 
 int main(void) {
 
-	printf("Empieza el main\n ");
 
-	//char *apuntador_entrada_usuario;
-	//struct tcommand *apuntador_objeto_tcommand;
 	struct tline *apuntador_objeto_tline;
+	char entrada_usuario [100];
+	char *apuntador;
+	int control_error;
 
+
+
+	signal (SIGINT, SIG_IGN);
+	signal (SIGQUIT, SIG_IGN);
+	signal (SIGTSTP, catch1);
+
+		//char c;
+		//while((c = getchar()) != '\n' && c != EOF);
+
+
+	while(foo){
+			imprime_el_prompt();
+			//Lee ordenes desde teclado
+			apuntador=fgets(entrada_usuario,100,stdin);
+			limpia(apuntador);
+			if(entrada_usuario[0]!='\0'){//La orden no esta vacia
+				//Analizar, ordenar y diferenciar los campos de la linea
+				//analiza_objeto_tline(apuntador_objeto_tline);
+				apuntador_objeto_tline =  tokenize(entrada_usuario);
+
+
+				//Reviso los mandatos que componen la linea en busca de errores del tipo:
+				//- Alguno de los mandatos no existe ==> Se imprime: "mandato: No se encuentra el mandato"
+				//- Algun parametro de alguno de los mandatos no existe  ==> Se imprime: "mandato: No se encuentra el mandato"
+				//- Las redireccciones no son correctas ==> “fichero: Error. Descripción del error”
+				control_error = analiza_en_busca_errores_mandatos_linea(apuntador_objeto_tline);
+
+
+			}else{//la orden esta vacia
+
+			}
+	}
+
+	//liberamos la memoria antes de salir del programa
+	for(int i = 0; i<apuntador_objeto_tline->ncommands;i++){
+		free(apuntador_objeto_tline->commands[i].filename);
+	}
+	free(apuntador_objeto_tline->commands);
+	free(apuntador_objeto_tline->redirect_input);
+	free(apuntador_objeto_tline->redirect_output);
+	free(apuntador_objeto_tline->redirect_error);
+
+
+		imprime_adios();
+		return EXIT_SUCCESS;
+}
+
+void catch1(int sig){
+
+	//signal(SIGINT, catch1);
+	printf("\nSeñal: %i atrapada!\n", sig);
+	foo = 0;
 
 
 	//char c;
-	//while ((c = getchar()) != '\n' && c != EOF);
+	//while((c = getchar()) != '\n' && c != EOF);
 
-
-
-	while(1){
-
-		printf("Empieza el bucle while\n ");
-		char entradaUsuario[100];
-		char *apuntador_entradaUsuario = NULL;
-
-		printf("msh> ");
-
-		apuntador_entradaUsuario = fgets (entradaUsuario,100,stdin);
-		strtok(entradaUsuario, "\n"); //Elminia el salto de linea de la cadena entradaUsusario
-		//Quitamos
-		//fgets (entradaUsuario, 100, stdin);
-
-		printf("\n");//Dejar aqui porque sino la consola se vuelve loca
-
-
-		//strcmp(apuntador_entrada_usuario,"\n")==0
-		if(apuntador_entradaUsuario==NULL) {
-			//ERROR en fgets(): Si entra aqui significa que: fgets no ha almacenado ninguno (error o carácter fin-de-fichero, CTRL+Z) devuelve un puntero NULL.
-			printf("\n");
-			printf("Entra en 1\n");
-
-
-		}else{
-			printf("\n");
-			printf("Entra en 2\n");
-
-
-			if(strcmp(entradaUsuario,"\n")==0){
-				printf("\n");
-				printf("-- El ususario no introdujo ningún mandato, directamente pulsó la tecla ENTER: %s\n",entradaUsuario);
-
-			}else{
-
-				printf("\n");
-				printf("--El comando introducido por el usuario es: : %s\n",entradaUsuario);
-
-				apuntador_objeto_tline =  tokenize(apuntador_entradaUsuario);
-				printf("-- Analizamos el mandato\n");
-
-				int numComandosRecibidos;
-				numComandosRecibidos = apuntador_objeto_tline->ncommands;
-
-				printf("---- Número comandos recibidos en la linea es: %d \n", apuntador_objeto_tline->ncommands);
-				int i =1;
-
-				while(i<=numComandosRecibidos){
-
-					printf("---- El mandato %i que contiene la linea es: %s\n",i,apuntador_objeto_tline->commands[i-1].filename);
-					i++;
-				}
-
-
-
-			}
-
-
-
-		}
-		//while(getchar()!= '\n');
-
-
-	}
-
-	return EXIT_SUCCESS;
 }
+

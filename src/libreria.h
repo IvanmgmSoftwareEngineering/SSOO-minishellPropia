@@ -17,7 +17,7 @@ struct tcommand{
 struct tline{
 	int ncommands;
 	struct tcommand *commands;
-	char *redirect_outinput;
+	char *redirect_input;
 	char *redirect_output;
 	char *redirect_error;
 	int background; //activado a 1 si el mandato se ejecuta o 0 en caso contrario
