@@ -5,28 +5,18 @@
  *      Author: IvanMGM
  */
 
-#include "libreria.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
+#include "libreria.h"
 #include "my_libreria.h"
-#include "error_mandatos.h"
+
+
+
 
 int resultado;
-
-typedef char Comando [100];
-Comando *arreglo_comandos;
-
-typedef char Nombres_ficheros_salida[100];
-Nombres_ficheros_salida *ficheros_salida;
-
-typedef char Nombres_ficheros_error[100];
-Nombres_ficheros_error *ficheros_error;
-
-
-char redireccion[50];
-
-
 
 
 
@@ -37,11 +27,31 @@ int analiza_en_busca_errores_mandatos_linea(struct tline *apuntador_estructura_t
 	printf("ENTRO FUNCIÓN void ejecuta(struct tline *apuntador_objeto_tline)\n");
 	printf("\n");
 */
-	//Comprobamos que los mandatos exixten
-	int k;
-	int m ;
+	// ZONA DE DECLARACION DE VARIABLES
+	typedef char Comando [100];
+	Comando *arreglo_comandos;
+	typedef char Nombres_ficheros_salida[100];
+	Nombres_ficheros_salida *ficheros_salida;
+	typedef char Nombres_ficheros_error[100];
+	Nombres_ficheros_error *ficheros_error;
+	FILE *fichero;
+	FILE *aux_fichero;
+	char redireccion[50];
+	char nombre_fichero[100];
+	char letra;
 	int *comando_existe;
+	int resultado;
+	int i,j,k,m;
+	int todos_mandatos_y_parametros_de_la_linea_estan_bien;
+	int redireccion_entrada_correcta; //0 = CORRECTA, != INCORRECTA
+	int redireccion_salida_correcta; //0 = CORRECTA, != INCORRECTA
+	int redireccion_error_correcta; //0 = CORRECTA, != INCORRECTA
+	int encontrado; //0=encontrado, -1=No encontrado
+	// FIN ZONA DE DECLARACION DE VARIABLES
 
+
+	//Comprobamos que los mandatos exixten
+	resultado = 0;
 	ficheros_salida =  malloc(apuntador_estructura_tline->ncommands*100 * sizeof(char));
 
 	if (ficheros_salida == NULL){ //manejo de errores de malloc
@@ -130,9 +140,9 @@ int analiza_en_busca_errores_mandatos_linea(struct tline *apuntador_estructura_t
 
 
 
-	for(int i=0;i<apuntador_estructura_tline->ncommands;i++){
+	for(i=0;i<apuntador_estructura_tline->ncommands;i++){
 
-		for(int j=0;j<mi_lenght(apuntador_estructura_tline->commands[i].filename);j++){
+		for(j=0;j<mi_lenght(apuntador_estructura_tline->commands[i].filename);j++){
 			arreglo_comandos[i][j]=apuntador_estructura_tline->commands[i].filename[j];
 		}
 		//printf("--Analizando comando %i: %s\n",i,arreglo_comandos[i]);
@@ -169,17 +179,18 @@ int analiza_en_busca_errores_mandatos_linea(struct tline *apuntador_estructura_t
 
 	}
 
-	sleep(10);
-	int algun_mandato_o_parametro_de_la_linea_no_esta_bien = 0; //0 esta bien, -1 esta mal
+	//printf("Durmiento: aprovecha y prueba Ctrl+C:");
+	//sleep(10);
+	todos_mandatos_y_parametros_de_la_linea_estan_bien = 0; //0 todo esta bien, -1 alguo esta mal
 
 	for (k=0;k<apuntador_estructura_tline->ncommands;k++){
 		if(comando_existe[k] != 0){
-			algun_mandato_o_parametro_de_la_linea_no_esta_bien = -1;
+			todos_mandatos_y_parametros_de_la_linea_estan_bien = -1;
 
 		}
 	}
-	if(algun_mandato_o_parametro_de_la_linea_no_esta_bien == -1){
-		resultado = algun_mandato_o_parametro_de_la_linea_no_esta_bien;
+	if(todos_mandatos_y_parametros_de_la_linea_estan_bien == -1){
+		resultado = todos_mandatos_y_parametros_de_la_linea_estan_bien;
 		printf("mandato: No se encuentra el mandato\n");
 	}
 
@@ -198,12 +209,200 @@ int analiza_en_busca_errores_mandatos_linea(struct tline *apuntador_estructura_t
 	}
 
 	//comprobamos si se produce error al abrir el fichero de redireccion.
-	// redireccion entrada: ¿el fichero debe existir previamente?
-	//redireccion salida: el fichero no debe porque existir previamente
-	//redirreción error: el fichero no debe porque existir previamente
-	//Si los mandatos y los parametros de cada uno de elllos son correctos, entonces continuamos.
+	//redireccion entrada: el fichero debe existir previamente y tener permiso de lectura
+	//redireccion salida: el fichero no debe porque existir previamente, pero si existe deber tener pemriso de escritura
+	//redirreción error: el fichero no debe porque existir previamente, pero si existe deber tener pemriso de escritura
+	//Si los mandatos y los parametros de cada uno de los mandatos son correctos, entonces continuamos.
 
-	if(algun_mandato_o_parametro_de_la_linea_no_esta_bien == 0){
+	redireccion_entrada_correcta = 0; //0 = CORRECTA, != INCORRECTA
+	redireccion_salida_correcta = 0; //0 = CORRECTA, != INCORRECTA
+	redireccion_error_correcta = 0; //0 = CORRECTA, != INCORRECTA
+
+	if(todos_mandatos_y_parametros_de_la_linea_estan_bien == 0){
+
+		//comprobamos si hay redireccion de entrada; en caso de haberla comprobamos que el fichero existe
+		if(apuntador_estructura_tline->redirect_input !=NULL){
+
+			fichero = fopen(apuntador_estructura_tline->redirect_input,"rt");
+			if(fichero == NULL){
+				//Debemos comprobar el motivo por el que el fichero no se ha abierto
+				//Motivo1: El fichero existe pero no tiene permiso de lectura
+				//Motivo 2:el fichero no existe
+				redireccion_entrada_correcta = -1;
+				system("ls 1>comprobacion.txt");
+
+
+
+				aux_fichero = fopen("comprobacion.txt","r");
+				if (aux_fichero == NULL) {
+						printf( "No se puede abrir el fichero comprobacion.txt.\n" );
+						exit( 1 );
+				}
+
+
+				k=0;
+				while (k<100){
+					nombre_fichero[k]='\0';
+					k++;
+				}
+
+				encontrado = -1; //0=encontrado, -1=No encontrado
+				k=0;
+				letra = getc(aux_fichero);
+				while (letra != EOF && encontrado !=0) {
+					while(letra != '\n' && letra != EOF){
+						nombre_fichero[k] = letra;
+						k++;
+						letra = getc(aux_fichero);
+					}
+
+					encontrado = strcmp(nombre_fichero,apuntador_estructura_tline->redirect_input);
+
+
+
+					if(letra != EOF && encontrado != 0){
+						letra = getc(aux_fichero);//Almacena el primer caracter de la siguiente linea
+						k=0;//Borramos todo lo que hay en nombre_fichero
+						while (k<100){
+							nombre_fichero[k]='\0';
+							k++;
+						}
+						k=0;
+					}
+				}
+
+				if(encontrado ==0){
+					printf("fichero: Error. El fichero %s existe pero no tiene permiso de lectura\n",apuntador_estructura_tline->redirect_input);
+				}else{
+					printf("fichero: Error. El fichero %s no esixte\n",apuntador_estructura_tline->redirect_input);
+				}
+
+				if(remove("comprobacion.txt")!=0){
+					printf("Hubo algun problema borrando fichero comprobacion.txt\n");
+				}
+
+			}
+		}else if (apuntador_estructura_tline->redirect_output !=NULL){
+			FILE *fichero;
+			fichero = fopen(apuntador_estructura_tline->redirect_output,"wt");
+			if(fichero == NULL){
+				//Debemos comprobar el motivo por el que el fichero no se ha abierto
+				//Motivo :el fichero no existe
+				redireccion_salida_correcta = -1;
+				system("ls 1>comprobacion.txt");
+
+				FILE *aux_fichero;
+				char letra;
+
+				aux_fichero = fopen("comprobacion.txt","r");
+				if (aux_fichero == NULL) {
+					printf( "No se puede abrir el fichero comprobacion.txt.\n" );
+					exit( 1 );
+				}
+				char nombre_fichero[100];
+
+				int k;
+
+				k=0;
+				while (k<100){
+					nombre_fichero[k]='\0';
+					k++;
+				}
+
+				int encontrado = -1; //0=encontrado, -1=No encontrado
+				k=0;
+				letra = getc(aux_fichero);
+				while (letra != EOF && encontrado !=0) {
+					while(letra != '\n' && letra != EOF){
+						nombre_fichero[k] = letra;
+						k++;
+						letra = getc(aux_fichero);
+					}
+
+					encontrado = strcmp(nombre_fichero,apuntador_estructura_tline->redirect_output);
+
+
+
+					if(letra != EOF && encontrado != 0){
+						letra = getc(aux_fichero);//Almacena el primer caracter de la siguiente linea
+						k=0;//Borramos todo lo que hay en nombre_fichero
+						while (k<100){
+							nombre_fichero[k]='\0';
+							k++;
+						}
+						k=0;
+					}
+				}
+				if(encontrado ==0){
+					printf("fichero: Error. El fichero %s existe pero no tiene permiso de escritura\n",apuntador_estructura_tline->redirect_output);
+				}
+
+				if(remove("comprobacion.txt")!=0){
+					printf("Hubo algun problema borrando fichero comprobacion.txt\n");
+				}
+
+			}
+
+
+		}else if (apuntador_estructura_tline->redirect_error !=NULL){
+
+
+			fichero = fopen(apuntador_estructura_tline->redirect_output,"wt");
+			if(fichero == NULL){
+				//Debemos comprobar el motivo por el que el fichero no se ha abierto
+				//Motivo :el fichero no existe
+				redireccion_error_correcta = -1;
+				system("ls 1>comprobacion.txt");
+
+
+
+				aux_fichero = fopen("comprobacion.txt","r");
+				if (aux_fichero == NULL) {
+					printf( "No se puede abrir el fichero comprobacion.txt.\n" );
+					exit( 1 );
+				}
+
+
+				k=0;
+				while (k<100){
+					nombre_fichero[k]='\0';
+					k++;
+				}
+
+				encontrado = -1; //0=encontrado, -1=No encontrado
+				k=0;
+				letra = getc(aux_fichero);
+				while (letra != EOF && encontrado !=0) {
+					while(letra != '\n' && letra != EOF){
+						nombre_fichero[k] = letra;
+						k++;
+						letra = getc(aux_fichero);
+					}
+
+					encontrado = strcmp(nombre_fichero,apuntador_estructura_tline->redirect_output);
+
+
+
+					if(letra != EOF && encontrado != 0){
+						letra = getc(aux_fichero);//Almacena el primer caracter de la siguiente linea
+						k=0;//Borramos todo lo que hay en nombre_fichero
+						while (k<100){
+							nombre_fichero[k]='\0';
+							k++;
+						}
+						k=0;
+					}
+				}
+				if(encontrado ==0){
+					printf("fichero: Error. El fichero %s existe pero no tiene permiso de escritura\n",apuntador_estructura_tline->redirect_output);
+				}
+
+				if(remove("comprobacion.txt")!=0){
+					printf("Hubo algun problema borrando fichero comprobacion.txt\n");
+				}
+
+			}
+		}
 
 	}
 
@@ -216,5 +415,15 @@ int analiza_en_busca_errores_mandatos_linea(struct tline *apuntador_estructura_t
 	printf("\n");
 
 */
+	if(todos_mandatos_y_parametros_de_la_linea_estan_bien != 0){
+		resultado = -1;
+
+	}else if(redireccion_entrada_correcta != 0){
+		resultado = -1;
+	}else if(redireccion_salida_correcta != 0){
+		resultado = -1;
+	}else if(redireccion_error_correcta != 0){
+		resultado = -1;
+	}
 	return resultado;
 }

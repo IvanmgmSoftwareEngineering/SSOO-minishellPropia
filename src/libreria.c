@@ -11,6 +11,7 @@
 #include "libreria.h"
 #include "my_libreria.h"
 
+
 struct tline objeto_tline;
 
 
@@ -22,7 +23,29 @@ struct tline *tokenize(char *str){
 	printf("ENTRO FUNCIÓN struct tline *tokenize(char *str)\n");
 	printf("\n");
 */
+
+	// ZONA DE DECLARACION DE VARIABLES
 	struct tline *apuntador_objeto_tline;
+	struct tcommand *commands;
+	typedef char AregloMandatos[100];
+	AregloMandatos *mandatos;
+	char **parametros;
+	char *copia_str;
+	int *posiciones;
+	int *numero_parametros_cada_mandato;
+	int contador_tamaño_mandato;
+	int tamaño_str;
+	int contadorMandatos;
+	int exixte_redireccion_salida_mandato;//SI =1 , NO = 0
+	int posicion_redireccion_salida_mandato;
+	int exixte_redireccion_entrada_mandato;//SI =1 , NO = 0
+	int posicion_redireccion_entrada_mandato;
+	int longitud_nombre_fichero_redireccion;
+	int encontrado;
+	int contador;
+	int background;
+	int i,j,k,r,m;
+	// FIN ZONA DE DECLARACION DE VARIABLES
 
 
 	apuntador_objeto_tline = &objeto_tline;
@@ -32,8 +55,8 @@ struct tline *tokenize(char *str){
 	//Recordar que los mandatos están separados por el símbolo '|'
 
 	//printf("Paso 1) Extraemos el número de mandatos que hay en la línea.\n");
-	int contadorMandatos;
-	int i;
+
+
 
 	i = 0;
 	contadorMandatos = 1;
@@ -63,15 +86,8 @@ struct tline *tokenize(char *str){
 
 	//printf("Paso 2) Extraemos cada uno de los mandatos que hay en la línea y los almacenamos en la matriz commands \n");
 
-	int k,j;
-	int contador_tamaño_mandato;
-	int tamaño_str;
-	char *copia_str;
-	int *posiciones;
-	struct tcommand *commands;
 
-	typedef char AregloMandatos[100];
-	AregloMandatos *mandatos;
+
 
 	tamaño_str = mi_lenght(str);
 	copia_str = (char *)malloc(tamaño_str * sizeof(char));
@@ -183,10 +199,10 @@ struct tline *tokenize(char *str){
 	//printf("Paso 3) Buscamos redirección y en el caso de haberla limpiamos el último mandato.\n");
 
 
-	int exixte_redireccion_salida_mandato = 0 ;//SI =1 , NO = 0
-	int posicion_redireccion_salida_mandato  = 0 ;
-	int exixte_redireccion_entrada_mandato  = 0 ;//SI =1 , NO = 0
-	int posicion_redireccion_entrada_mandato = 0 ;
+	exixte_redireccion_salida_mandato = 0 ;//SI =1 , NO = 0
+	posicion_redireccion_salida_mandato  = 0 ;
+	exixte_redireccion_entrada_mandato  = 0 ;//SI =1 , NO = 0
+	posicion_redireccion_entrada_mandato = 0 ;
 
 
 
@@ -194,18 +210,18 @@ struct tline *tokenize(char *str){
 
 
 
-		for (j=0;j < mi_lenght(str) ;j++){
-			if(str[j] == '>'){
-				exixte_redireccion_salida_mandato = 1;
-				posicion_redireccion_salida_mandato = j;
+	for (j=0;j < mi_lenght(str) ;j++){
+		if(str[j] == '>'){
+			exixte_redireccion_salida_mandato = 1;
+			posicion_redireccion_salida_mandato = j;
 
-			} else if(str[j] ==  '<'){
-				exixte_redireccion_entrada_mandato = 1;
-				posicion_redireccion_entrada_mandato = j;
-			}
+		} else if(str[j] ==  '<'){
+			exixte_redireccion_entrada_mandato = 1;
+			posicion_redireccion_entrada_mandato = j;
 		}
+	}
 
-	int longitud_nombre_fichero_redireccion = 0;
+	longitud_nombre_fichero_redireccion = 0;
 	if(exixte_redireccion_salida_mandato == 1){
 
 		if(str[posicion_redireccion_salida_mandato-1]==' ' ||str[posicion_redireccion_salida_mandato-1]=='1'){
@@ -219,7 +235,7 @@ struct tline *tokenize(char *str){
 				objeto_tline.redirect_output[j] = str[j+posicion_redireccion_salida_mandato + 2];
 			}
 			if(str[posicion_redireccion_salida_mandato-1]==' '){
-				int encontrado = 0;
+				encontrado = 0;
 				for (i=0;i<mi_lenght(objeto_tline.commands[contadorMandatos-1].filename);i++){
 					if(objeto_tline.commands[contadorMandatos-1].filename[i] == '>'){
 						encontrado = 1;
@@ -228,7 +244,7 @@ struct tline *tokenize(char *str){
 						objeto_tline.commands[contadorMandatos-1].filename[i] ='\0';
 					}
 				}
-				objeto_tline.commands[contadorMandatos-1].filename[mi_lenght(objeto_tline.commands[contadorMandatos-1].filename)-1] ='\0';
+				//objeto_tline.commands[contadorMandatos-1].filename[mi_lenght(objeto_tline.commands[contadorMandatos-1].filename)-1] ='\0';
 			}else{
 				int encontrado = 0;
 				for (i=0;i<mi_lenght(objeto_tline.commands[contadorMandatos-1].filename);i++){
@@ -239,7 +255,7 @@ struct tline *tokenize(char *str){
 						objeto_tline.commands[contadorMandatos-1].filename[i-1] ='\0';
 					}
 				}
-				objeto_tline.commands[contadorMandatos-1].filename[mi_lenght(objeto_tline.commands[contadorMandatos-1].filename)-1] ='\0';
+				//objeto_tline.commands[contadorMandatos-1].filename[mi_lenght(objeto_tline.commands[contadorMandatos-1].filename)-1] ='\0';
 
 			}
 			objeto_tline.redirect_input = NULL;
@@ -256,7 +272,7 @@ struct tline *tokenize(char *str){
 				objeto_tline.redirect_error[j] = str[j+posicion_redireccion_salida_mandato + 2];
 			}
 
-			int encontrado = 0;
+			encontrado = 0;
 			for (i=0;i<mi_lenght(objeto_tline.commands[contadorMandatos-1].filename);i++){
 				if(objeto_tline.commands[contadorMandatos-1].filename[i] == '>'){
 					encontrado = 1;
@@ -265,10 +281,18 @@ struct tline *tokenize(char *str){
 					objeto_tline.commands[contadorMandatos-1].filename[i-1] ='\0';
 				}
 			}
-			objeto_tline.commands[contadorMandatos-1].filename[mi_lenght(objeto_tline.commands[contadorMandatos-1].filename)-1] ='\0';
+			//objeto_tline.commands[contadorMandatos-1].filename[mi_lenght(objeto_tline.commands[contadorMandatos-1].filename)-1] ='\0';
 
 			objeto_tline.redirect_input = NULL;
 			objeto_tline.redirect_output = NULL;
+		}else{
+
+			objeto_tline.commands[contadorMandatos-1].filename = NULL;
+
+			objeto_tline.redirect_input = NULL;
+			objeto_tline.redirect_output = NULL;
+			objeto_tline.redirect_error = NULL;
+
 		}
 
 
@@ -285,7 +309,7 @@ struct tline *tokenize(char *str){
 		}
 		if(str[posicion_redireccion_entrada_mandato-1]==' ' ){
 
-			int encontrado = 0;
+			encontrado = 0;
 			for (i=0;i<mi_lenght(objeto_tline.commands[contadorMandatos-1].filename);i++){
 				if(objeto_tline.commands[contadorMandatos-1].filename[i] == '<'){
 					encontrado = 1;
@@ -297,7 +321,7 @@ struct tline *tokenize(char *str){
 			}
 
 		}else if (str[posicion_redireccion_entrada_mandato-1]=='0'){
-			int encontrado = 0;
+			encontrado = 0;
 			for (i=0;i<mi_lenght(objeto_tline.commands[contadorMandatos-1].filename);i++){
 				if(objeto_tline.commands[contadorMandatos-1].filename[i] == '<'){
 					encontrado = 1;
@@ -307,7 +331,12 @@ struct tline *tokenize(char *str){
 
 				}
 			}
-			objeto_tline.commands[contadorMandatos-1].filename[mi_lenght(objeto_tline.commands[contadorMandatos-1].filename)-1] ='\0';
+			//objeto_tline.commands[contadorMandatos-1].filename[mi_lenght(objeto_tline.commands[contadorMandatos-1].filename)-1] ='\0';
+
+		}else{
+			objeto_tline.commands[0].filename = NULL;
+
+			objeto_tline.redirect_input = NULL;
 
 		}
 
@@ -329,11 +358,29 @@ struct tline *tokenize(char *str){
 	//printf("-----------El valor de objeto_tline.redirect_error es:   %s\n ", objeto_tline.redirect_error);
 
 
-	k=0;
-		while(k<contadorMandatos){
+	//k=0;
+	//while(k<contadorMandatos){
 		//printf("-----------El valor de la variable objeto_tline.commands[%i].filename es: %s \n",k,objeto_tline.commands[k].filename);
-		k++;
-	}
+		//k++;
+	//}
+
+
+
+
+	//En este punto comprobamos si la linea contiene algun error debido a una mala sintaxis en la parte de la redireccion
+	//En concreto si se ha utilizado algo direferente a lo siguiente se detectará como un error:
+	// ... > nombre_fichero para la salida estandar
+	// ... 1> nombre_fichero para la salida estandar
+	// ... 2> nombre_fichero para la salida error
+	// ... < nombre_fichero para la entrada estandar
+	// ... 0< nombre_fichero para la salida estandar
+	// Considerando que la redirección de salida estandar o la salida de error afectá solo al ultimo mandato de la linea
+	// Se considera que la redirecion de entrada estandar afecta solo al primer mandato de la línea
+	//Por lo dicho anteriormente:
+	//Si hay un error sintáctico en la redireccion de salida se considerará que el último mandato de la linea tiene un error sintáctico y como consecuencia *filename = NULL de dicho mandato
+	//Si hay un error sintáctico en la redireccion de entrada se considerará que el primer mandato de la linea tiene un error sintáctico y como consecuencia *filename = NULL de dicho mandato
+if(objeto_tline.commands[contadorMandatos-1].filename != NULL && objeto_tline.commands[0].filename != NULL){
+
 
 	//------------------------------------------------------------------------
 	//------------------------------------------------------------------------
@@ -344,7 +391,6 @@ struct tline *tokenize(char *str){
 	//printf("Paso 4) Extraemos el numero de parámetros de cada uno de los mandatos.\n");
 
 
-	int *numero_parametros_cada_mandato;
 	numero_parametros_cada_mandato = (int *)malloc(contadorMandatos * sizeof(int));
 	if (numero_parametros_cada_mandato  == NULL){ //manejo de errores de malloc
 		printf("Ha habido un problema con la función malloc()");
@@ -356,7 +402,7 @@ struct tline *tokenize(char *str){
 		numero_parametros_cada_mandato[k] = 0;
 		k++;
 	}
-	int contador = 0;
+	contador = 0;
 	for (k=0;k < contadorMandatos ;k++){
 
 		for (j=0;j < mi_lenght(objeto_tline.commands[k].filename) ;j++){
@@ -380,9 +426,10 @@ struct tline *tokenize(char *str){
 	//printf("Paso 5) Extraemos los parámetros de cada uno de los mandatos.\n");
 
 
-	char **parametros;
 
-	int m = 0;
+
+	r = 0 ;
+	m = 0;
 	i = 0;
 	for (k=0;k < contadorMandatos ;k++){
 		parametros= (char *) malloc (objeto_tline.commands[k].argc * sizeof(char*));
@@ -392,7 +439,7 @@ struct tline *tokenize(char *str){
 			exit(0);
 		}
 
-		for (int r = 0; r<objeto_tline.commands[k].argc;r++){
+		for (r = 0; r<objeto_tline.commands[k].argc;r++){
 			parametros[r]=(char *) malloc(100 * sizeof(char*));
 			if (parametros[r]  == NULL){ //manejo de errores de malloc
 				printf("Ha habido un problema con la función malloc()");
@@ -442,7 +489,7 @@ struct tline *tokenize(char *str){
 
 	//printf("Paso 5) Comprobamos si está presente el simbolo & indicando que es en background.\n");
 
-	int background = 0 ;//SI =1 , NO = 0
+	background = 0 ;//SI =1 , NO = 0
 
 	for(j=0;j<mi_lenght(str);j++){
 		if(str[j] == '&'){
@@ -469,6 +516,8 @@ struct tline *tokenize(char *str){
 	printf("-----------------------------------------------\n");
 	printf("\n");
 */
+
+}
 	return apuntador_objeto_tline;
 
 }
