@@ -28,7 +28,7 @@ int analiza_en_busca_errores_mandatos_linea(struct tline *apuntador_estructura_t
 	printf("\n");
 */
 	// ZONA DE DECLARACION DE VARIABLES
-	typedef char Comando [100];
+	typedef char Comando [200];
 	Comando *arreglo_comandos;
 	typedef char Nombres_ficheros_salida[100];
 	Nombres_ficheros_salida *ficheros_salida;
@@ -36,11 +36,12 @@ int analiza_en_busca_errores_mandatos_linea(struct tline *apuntador_estructura_t
 	Nombres_ficheros_error *ficheros_error;
 	FILE *fichero;
 	FILE *aux_fichero;
-	char redireccion[50];
+	char redireccion[100];
 	char nombre_fichero[100];
 	char letra;
 	int *comando_existe;
 	int resultado;
+	int tamano_redireccion;
 	int i,j,k,m;
 	int todos_mandatos_y_parametros_de_la_linea_estan_bien;
 	int redireccion_entrada_correcta; //0 = CORRECTA, != INCORRECTA
@@ -124,11 +125,11 @@ int analiza_en_busca_errores_mandatos_linea(struct tline *apuntador_estructura_t
 
 
 
-	arreglo_comandos = (Comando*)malloc(apuntador_estructura_tline->ncommands * 100* sizeof(char));
+	arreglo_comandos = (Comando*)malloc(apuntador_estructura_tline->ncommands * 200* sizeof(char));
 	k =0;
 	m =0;
 	while (k<apuntador_estructura_tline->ncommands){
-		while(m<100){
+		while(m<200){
 			arreglo_comandos[k][m]='\0';
 			m++;
 		}
@@ -141,6 +142,7 @@ int analiza_en_busca_errores_mandatos_linea(struct tline *apuntador_estructura_t
 
 
 	for(i=0;i<apuntador_estructura_tline->ncommands;i++){
+		printf("puntador_estructura_tline->commands[%i].filename = %s.\n",i,apuntador_estructura_tline->commands[i].filename);
 
 		for(j=0;j<mi_lenght(apuntador_estructura_tline->commands[i].filename);j++){
 			arreglo_comandos[i][j]=apuntador_estructura_tline->commands[i].filename[j];
@@ -150,18 +152,23 @@ int analiza_en_busca_errores_mandatos_linea(struct tline *apuntador_estructura_t
 		//printf("Redirigimos la salida estandar y la salida de error\n");
 
 		//printf("redirección = %s\n",redireccion);
-
-
-		sprintf(redireccion , " 2> redirect_error_%i.txt 1> redirect_output_%i.txt",i,i);
-
+		if(arreglo_comandos[i][0]=='c'&&arreglo_comandos[i][1]=='a'&&arreglo_comandos[i][2]=='t'){
+			sprintf(redireccion , " 0< origin.txt 2> redirect_error_%i.txt 1> redirect_output_%i.txt",i,i);
+			arreglo_comandos[i][3]='\0'; //
+			tamano_redireccion = 63;
+		}else{
+			sprintf(redireccion , " 2> redirect_error_%i.txt 1> redirect_output_%i.txt",i,i);
+			tamano_redireccion = 49;
+		}
+		printf("redireccion = %s\n",redireccion);
 
 		//printf("redirección = %s\n",redireccion);
 
-		for(int j=0;j<49;j++){
+		for(int j=0;j<tamano_redireccion;j++){
 			arreglo_comandos[i][j+mi_lenght(apuntador_estructura_tline->commands[i].filename) ]= redireccion[j];
 		}
 		//printf("--El comando con redireccion es: %s\n",arreglo_comandos[i]);
-
+		printf("arreglo_comandos[%i] = %s\n",i,arreglo_comandos[i]);
 		comando_existe[i]  = system (arreglo_comandos[i]);
 		//printf("comando_existe[%i] = %i",i,comando_existe[i]);
 		/*

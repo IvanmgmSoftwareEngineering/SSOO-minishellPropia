@@ -252,7 +252,7 @@ struct tline *tokenize(char *str){
 						encontrado = 1;
 					}
 					if(encontrado ==1){
-						objeto_tline.commands[contadorMandatos-1].filename[i-1] ='\0';
+						objeto_tline.commands[contadorMandatos-1].filename[i-2] ='\0';
 					}
 				}
 				//objeto_tline.commands[contadorMandatos-1].filename[mi_lenght(objeto_tline.commands[contadorMandatos-1].filename)-1] ='\0';
@@ -278,7 +278,7 @@ struct tline *tokenize(char *str){
 					encontrado = 1;
 				}
 				if(encontrado ==1){
-					objeto_tline.commands[contadorMandatos-1].filename[i-1] ='\0';
+					objeto_tline.commands[contadorMandatos-1].filename[i-2] ='\0';
 				}
 			}
 			//objeto_tline.commands[contadorMandatos-1].filename[mi_lenght(objeto_tline.commands[contadorMandatos-1].filename)-1] ='\0';
@@ -327,7 +327,7 @@ struct tline *tokenize(char *str){
 					encontrado = 1;
 				}
 				if(encontrado ==1){
-					objeto_tline.commands[contadorMandatos-1].filename[i-1] ='\0';
+					objeto_tline.commands[contadorMandatos-1].filename[i-2] ='\0';
 
 				}
 			}
